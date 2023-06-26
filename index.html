@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="stylesheet" href="css/common.css">
+</head>
+<style>
+	.wrap {
+		position: relative;
+		width: 400px;
+		margin: 120px auto;
+		border: 1px solid #000;
+	}
+
+	img {
+		width: 100%;
+	}
+
+	.zoom {
+		position: absolute;
+		height: 200px;
+		width: 200px;
+		background-color: #EFF0F1;
+		background-repeat: no-repeat;
+		border: 1px solid #E1E2E4 !important;
+		border-radius: 200px;
+		will-change: left, top;
+		box-shadow: 0 1px 2px rgba(27, 36, 50, 0.15);
+		display: none;
+		z-index: 1000;
+		cursor: none;
+	}
+
+	.desc {
+		text-align: center;
+	}
+</style>
+
+<body>
+	<div class="wrap">
+		<img src="image.jpg" alt="">
+	</div>
+	<p class="desc"></p>
+</body>
+<script>
+	class ZoomImage {
+		#magnification;
+		constructor(target, magnification) {
+			this.target = target;
+			this.image = this.target.querySelector('img');
+			this.#magnification = magnification;
+
+			this.#makeZoom();
+			this.#init();
+		}
+
+		get magnification() {
+			return this.#magnification;
+		}
+
+		#makeZoom() {
+			const zoomDiv = document.createElement('div');
+			this.zoom = zoomDiv;
+			zoomDiv.classList.add('zoom');
+			this.target.append(zoomDiv);
+
+			const imgSrc = this.image.src;
+			this.zoom.style.backgroundImage = `url(${imgSrc})`;
+			this.zoom.style.backgroundSize = this.target.getBoundingClientRect().width * this.#magnification + 'px';
+		}
+
+		#init() {
+			this.target.addEventListener('mousemove', (e) => {
+
+				const targetRect = this.target.getBoundingClientRect();
+				const xPosition = e.clientX - targetRect.x;
+				const yPosition = e.clientY - targetRect.y;
+
+				const mouseOut = xPosition < 0 || xPosition > targetRect.width || yPosition < 0 || yPosition > targetRect.height;
+				this.zoom.style.display = 'block';
+				if (mouseOut) {
+					this.zoom.style.display = 'none';
+					return;
+				}
+
+				const zomHalfWidth = this.zoom.offsetWidth / 2;
+				const zoomPositionX = (xPosition - zomHalfWidth) / targetRect.width * 100;
+				const zoomPositionY = (yPosition - zomHalfWidth) / targetRect.height * 100;
+				const bgPositionX = -(xPosition * this.#magnification - zomHalfWidth);
+				const bgPositionY = -(yPosition * this.#magnification - zomHalfWidth);
+
+				this.zoom.style.left = `${zoomPositionX}%`;
+				this.zoom.style.top = `${zoomPositionY}%`;
+				this.zoom.style.backgroundPosition = `${bgPositionX}px ${bgPositionY}px`;
+			});
+		}
+
+	}
+
+
+	const zoom1 = new ZoomImage(document.querySelector('.wrap'), 3);
+	document.querySelector('.desc').innerHTML = `X${zoom1.magnification} 배율`;
+
+
+
+</script>
+
+</html>
